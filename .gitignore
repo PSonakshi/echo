@@ -1,0 +1,38 @@
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Environments ---
+# Common names for virtual environments, just in case
+.env
+.venv
+env/
+venv/
+ENV/
+
+# --- Data & RAG Documents ---
+# Ignoring the 'data' directory contents (PDFs/Knowledge base)
+data/*
+# Optional: Keep the data folder structure but ignore files
+!data/.gitkeep
+
+# --- Configuration & Secrets ---
+# app.yaml often contains environment variables/secrets
+app.yaml
+
+# --- Local Assets ---
+# Specific private image file from your tree
+private_rag.png
+
+# --- IDE & OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Testing ---
+.pytest_cache/
+coverage.xml
+htmlcov/
