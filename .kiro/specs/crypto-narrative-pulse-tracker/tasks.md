@@ -67,8 +67,8 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
     - Use pw.reducers.avg() for velocity aggregation
     - _Requirements: 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 5. Basic Pulse Score Calculator
-  - [ ] 5.1 Create transforms/pulse_score.py with PulseScoreCalculator class
+- [x] 5. Basic Pulse Score Calculator
+  - [x] 5.1 Create transforms/pulse_score.py with PulseScoreCalculator class
     - Implement scoring formula: sentiment (0-4) + phrase (0-3) + influencer (0-3) - divergence (0-1)
     - Clamp output to [1, 10] range using max(1.0, min(10.0, score))
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9_

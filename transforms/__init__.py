@@ -4,11 +4,17 @@ Transforms module for the Crypto Narrative Pulse Tracker.
 Contains transformation components for the Pathway streaming pipeline:
 - SentimentAnalyzer: VADER-based sentiment analysis with crypto lexicon
 - Sentiment Pipeline: Pathway integration for sentiment velocity
+- PulseScoreCalculator: Combined momentum scoring (1-10)
 - (Future) PhraseClusterer: N-gram extraction and trending detection
 - (Future) InfluenceCalculator: Author influence scoring
-- (Future) PulseScoreCalculator: Combined momentum scoring
 """
 
+from transforms.pulse_score import (
+    DivergenceType,
+    PulseScoreCalculator,
+    calculate_pulse_score,
+    get_pulse_calculator,
+)
 from transforms.sentiment import (
     SentimentAnalyzer,
     analyze_sentiment,
@@ -20,6 +26,11 @@ __all__ = [
     "SentimentAnalyzer",
     "analyze_sentiment",
     "get_sentiment_analyzer",
+    # Pulse Score Calculator
+    "DivergenceType",
+    "PulseScoreCalculator",
+    "calculate_pulse_score",
+    "get_pulse_calculator",
 ]
 
 # Pathway-dependent imports (only available when pathway is installed)
