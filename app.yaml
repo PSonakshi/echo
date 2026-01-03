@@ -1,51 +1,42 @@
-# This YAML configuration file is used to set up and configure the Private RAG template.
-# It defines various components such as data sources, language models, embedders, splitters, parsers, and retrievers.
-# Each section is configured to specify how the template should process and handle data for generating responses.
-# You can learn more about the YAML syntax here: https://pathway.com/developers/templates/configure-yaml
+# Crypto Narrative Pulse Tracker - RAG Configuration
+# Built on Pathway RAG template for real-time crypto sentiment analysis
+# https://pathway.com/developers/templates/configure-yaml
 
-
-
-# $sources defines the data sources used to read the data which will be indexed in the RAG.
-# You can learn more how to configure data sources here:
-# https://pathway.com/developers/templates/yaml-examples/data-sources-examples
+# =============================================================================
+# DATA SOURCES
+# =============================================================================
+# Primary: HTTP webhook for messages from simulator/external sources
+# Secondary: File system for static documents
 
 $sources:
-  # File System connector, reading data locally.
+  # HTTP webhook connector for real-time message ingestion
+  # Messages from Hype Simulator and external webhooks arrive here
+  - !pw.io.http.rest_connector
+    host: "0.0.0.0"
+    port: 8080
+    schema: !pw.Schema
+      message_id: str
+      text: str
+      author_id: str
+      author_followers: int
+      timestamp: str
+      tags: list
+      engagement_count: int
+      source_platform: str
+    delete_completed_queries: false
+
+  # File System connector for static crypto documents/research
   - !pw.io.fs.read
     path: data
     format: binary
     with_metadata: true
 
-  # Uncomment to use the SharePoint connector
-  # - !pw.xpacks.connectors.sharepoint.read 
-  #   url: $SHAREPOINT_URL
-  #   tenant: $SHAREPOINT_TENANT
-  #   client_id: $SHAREPOINT_CLIENT_ID
-  #   cert_path: sharepointcert.pem
-  #   thumbprint: $SHAREPOINT_THUMBPRINT
-  #   root_path: $SHAREPOINT_ROOT
-  #   with_metadata: true
-  #   refresh_interval: 30
-
-  # Uncomment to use the Google Drive connector
-  # - !pw.io.gdrive.read
-  #   object_id: $DRIVE_ID
-  #   service_user_credentials_file: gdrive_indexer.json
-  #   file_name_pattern:
-  #     - "*.pdf"
-  #     - "*.pptx"
-  #   object_size_limit: null
-  #   with_metadata: true
-  #   refresh_interval: 30
 
 
-
-# Configures the LLM model settings for generating responses.
-# The list of available Pathway LLM wrappers is available here:
-# https://pathway.com/developers/api-docs/pathway-xpacks-llm/llms
-# You can learn more about those in our documentation:
-# https://pathway.com/developers/templates/rag-customization/llm-chats
-
+# =============================================================================
+# LLM CONFIGURATION
+# =============================================================================
+# Using Ollama for local LLM inference (no API costs)
 
 $llm_model: "ollama/mistral"
 
@@ -54,66 +45,103 @@ $llm: !pw.xpacks.llm.llms.LiteLLMChat
   retry_strategy: !pw.udfs.ExponentialBackoffRetryStrategy
     max_retries: 6
   cache_strategy: !pw.udfs.DefaultCache {}
-  temperature: 0
-  api_base: "http://localhost:11434"  
-  # api_base: "http://host.docker.internal:11434" # use this when you are running the app in the Docker on Mac or Windows
+  temperature: 0.1
+  api_base: "http://ollama:11434"  # Docker service name
+  # api_base: "http://localhost:11434"  # Use for local development
   async_mode: "fully_async"
 
+# =============================================================================
+# EMBEDDING CONFIGURATION
+# =============================================================================
 $embedding_model: "avsolatorio/GIST-small-Embedding-v0"
 
-# Specifies the embedder model for converting text into embeddings.
 $embedder: !pw.xpacks.llm.embedders.SentenceTransformerEmbedder
   model: $embedding_model
-  call_kwargs: 
+  call_kwargs:
     show_progress_bar: False
 
-# Sets up the splitter for chunking the documents.
+# =============================================================================
+# DOCUMENT PROCESSING
+# =============================================================================
+# Splitter for chunking documents
 $splitter: !pw.xpacks.llm.splitters.TokenCountSplitter
   max_tokens: 400
 
-# Configures the parser for processing and extracting information from documents.
+# Parser for processing documents
 $parser: !pw.xpacks.llm.parsers.DoclingParser
   table_parsing_strategy: "llm"
   async_mode: "fully_async"
   chunk: false
   cache_strategy: !pw.udfs.DefaultCache {}
 
-# Sets up the retriever factory for indexing and retrieving documents.
+# =============================================================================
+# RETRIEVER AND DOCUMENT STORE
+# =============================================================================
+# Retriever factory for indexing and retrieving documents
 $retriever_factory: !pw.indexing.UsearchKnnFactory
-  reserved_space: 1000
+  reserved_space: 2000  # Increased for crypto message volume
   embedder: $embedder
   metric: !pw.indexing.USearchMetricKind.COS
-  
-# Manages the storage and retrieval of documents for the RAG template.
+
+# Document store for RAG - indexes messages with metadata
 $document_store: !pw.xpacks.llm.document_store.DocumentStore
   docs: $sources
   parser: $parser
   splitter: $splitter
   retriever_factory: $retriever_factory
 
-# Configures the question-answering component using the RAG approach.
+# =============================================================================
+# QUESTION ANSWERING (RAG)
+# =============================================================================
+# Crypto-optimized RAG question answerer
 question_answerer: !pw.xpacks.llm.question_answering.AdaptiveRAGQuestionAnswerer
   llm: $llm
   indexer: $document_store
-  n_starting_documents: 2
+  n_starting_documents: 5  # Start with more docs for crypto context
   factor: 2
   max_iterations: 4
   strict_prompt: true
 
-# Change host and port of the webserver by uncommenting these lines
-# host: "0.0.0.0"
-# port: 8000
+# =============================================================================
+# SERVER CONFIGURATION
+# =============================================================================
+host: "0.0.0.0"
+port: 8000
 
-# By default, caching is enabled for UDFs with cache_strategy set.
-# You can disable it by uncommenting the following line.
-# persistence_mode: null
-# You can also set persistence_mode to !pw.PersistenceMode.PERSISTING to enable persistence
-# across restarts.
-# By default, when enabled, Cache is stored in .Cache directory.
-# You can customize the location by uncommenting and modifying the following lines:
-# persistence_backend: !pw.persistence.Backend.filesystem
-#   path: ".Cache"
+# =============================================================================
+# PERSISTENCE CONFIGURATION
+# =============================================================================
+# Enable persistence for fault tolerance (survives container restarts)
+persistence_mode: !pw.PersistenceMode.PERSISTING
+persistence_backend: !pw.persistence.Backend.filesystem
+  path: "./Cache"
 
-# If `terminate_on_error` is true then the program will terminate whenever any error is encountered.
-# Defaults to false, uncomment the following line if you want to set it to true
-# terminate_on_error: true
+# Set to true to terminate on errors (useful for debugging)
+terminate_on_error: false
+
+# =============================================================================
+# CRYPTO PULSE TRACKER CUSTOM SETTINGS
+# =============================================================================
+# These settings are used by the crypto pulse tracker components
+
+# Temporal window configuration (5-min sliding, 1-min hop)
+window_duration_mins: 5
+window_hop_mins: 1
+
+# Sentiment thresholds
+strong_bullish_threshold: 0.7
+strong_bearish_threshold: -0.7
+
+# Influencer classification threshold
+influencer_score_threshold: 10000
+
+# Trending phrase minimum frequency
+trending_phrase_min_frequency: 5
+
+# Alert thresholds
+alert_high_score: 7
+alert_low_score: 3
+
+# Divergence detection thresholds
+divergence_sentiment_threshold: 0.5
+divergence_price_threshold: 2.0

@@ -13,7 +13,7 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
 
 ## Tasks
 
-- [ ] 1. Adapt Project Structure for Crypto Pulse Tracker
+- [x] 1. Adapt Project Structure for Crypto Pulse Tracker
   - Extend requirements.txt with additional dependencies (vaderSentiment, python-telegram-bot, streamlit, requests)
   - Create .env.example with required environment variables (TELEGRAM_TOKEN, TRACKED_COIN, etc.)
   - Create docker-compose.yml to orchestrate pipeline, telegram bot, dashboard, and simulator services
