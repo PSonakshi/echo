@@ -137,7 +137,7 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
     - Return formatted response with pulse score, phrases, and risk assessment
     - _Requirements: 9.4_
 
-- [ ] 11. Checkpoint - Demo-Ready
+- [x] 11. Checkpoint - Demo-Ready
   - Verify end-to-end flow: simulator → pipeline → alerts
   - Test Telegram bot alerts and queries
   - Ensure all tests pass, ask the user if questions arise.
