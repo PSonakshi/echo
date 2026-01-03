@@ -20,8 +20,8 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
   - Update app.yaml to configure crypto-specific RAG settings
   - _Requirements: 13.1, 13.4, 13.5_
 
-- [ ] 2. Core Data Models and Schema
-  - [ ] 2.1 Create schemas.py with MessageSchema and PriceSchema
+- [x] 2. Core Data Models and Schema
+  - [x] 2.1 Create schemas.py with MessageSchema and PriceSchema
     - Define MessageSchema with fields (message_id, text, author_id, author_followers, timestamp, tags, engagement_count, source_platform)
     - Define PriceSchema with fields (coin_symbol, price_usd, timestamp, volume_24h)
     - Use Pathway's pw.Schema pattern from template
@@ -29,21 +29,21 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
   - [ ]* 2.2 Write property test for MessageSchema round-trip
     - **Property 1: Message Schema Validation Round-Trip**
     - **Validates: Requirements 1.1, 1.2**
-  - [ ] 2.3 Implement schema validation with error handling
+  - [x] 2.3 Implement schema validation with error handling
     - Validate required fields
     - Return structured error messages for invalid payloads
     - _Requirements: 1.3_
 
-- [ ] 3. Hype Simulator (Primary Data Source)
-  - [ ] 3.1 Create simulator/hype_simulator.py
+- [x] 3. Hype Simulator (Primary Data Source)
+  - [x] 3.1 Create simulator/hype_simulator.py
     - Define phase configuration (seed 10%, growth 40%, peak 30%, decline 20%)
     - Implement message generation with phase-appropriate sentiment and phrases
     - Include influencer accounts with high follower counts
     - _Requirements: 10.1, 10.3, 10.4_
-  - [ ] 3.2 Add price data generation to simulator
+  - [x] 3.2 Add price data generation to simulator
     - Generate correlated price data following hype cycle phases
     - _Requirements: 10.5_
-  - [ ] 3.3 Implement HTTP webhook sender in simulator
+  - [x] 3.3 Implement HTTP webhook sender in simulator
     - Send messages to pipeline webhook endpoint using requests library
     - Configurable duration (3-5 mins) and message count (200)
     - _Requirements: 10.2_
