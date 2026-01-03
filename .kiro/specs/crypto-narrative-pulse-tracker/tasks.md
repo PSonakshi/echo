@@ -92,16 +92,16 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
     - Use pw.Table.filter() with tag matching logic
     - _Requirements: 1.4_
 
-- [ ] 8. Price Data Integration
-  - [ ] 8.1 Create connectors/price_fetcher.py
+- [x] 8. Price Data Integration
+  - [x] 8.1 Create connectors/price_fetcher.py
     - Fetch from CoinGecko API or use simulated data from simulator
     - Implement caching with TTL for rate limit handling (50 calls/min)
     - _Requirements: 4.1, 4.7_
-  - [ ] 8.2 Add price delta calculation to pipeline
+  - [x] 8.2 Add price delta calculation to pipeline
     - Use pw.temporal.sliding() with standard 5-min window
     - Calculate percentage change: (end - start) / start * 100
     - _Requirements: 4.2_
-  - [ ] 8.3 Create transforms/divergence.py for divergence detection
+  - [x] 8.3 Create transforms/divergence.py for divergence detection
     - Detect bearish divergence: sentiment > 0.5 AND price_delta < -2%
     - Detect bullish divergence: sentiment < -0.5 AND price_delta > 2%
     - _Requirements: 4.4, 4.5_
