@@ -109,16 +109,16 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
     - **Property 8: Divergence Detection**
     - **Validates: Requirements 4.4, 4.5**
 
-- [ ] 9. Document Store and RAG Integration
-  - [ ] 9.1 Extend app.yaml for crypto message indexing
+- [x] 9. Document Store and RAG Integration
+  - [x] 9.1 Extend app.yaml for crypto message indexing
     - Configure DocumentStore to index messages with metadata (sentiment, influence_score, source_platform)
     - Use existing SentenceTransformerEmbedder from template
     - _Requirements: 8.1, 8.2_
-  - [ ] 9.2 Create rag/live_metrics.py for state management
+  - [x] 9.2 Create rag/live_metrics.py for state management
     - Create shared state dict for pulse_score, trending_phrases, influencer_consensus, divergence_status
     - Use pw.io.subscribe() to update state from pipeline outputs
     - _Requirements: 8.4_
-  - [ ] 9.3 Create rag/crypto_rag.py extending template's question answerer
+  - [x] 9.3 Create rag/crypto_rag.py extending template's question answerer
     - Build context-enriched prompt with live metrics
     - Retrieve top 15 relevant messages
     - Use Ollama (from template config) for LLM responses

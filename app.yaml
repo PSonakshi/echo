@@ -84,6 +84,8 @@ $retriever_factory: !pw.indexing.UsearchKnnFactory
   metric: !pw.indexing.USearchMetricKind.COS
 
 # Document store for RAG - indexes messages with metadata
+# Configured to index crypto messages with sentiment, influence_score, source_platform
+# Requirements: 8.1, 8.2
 $document_store: !pw.xpacks.llm.document_store.DocumentStore
   docs: $sources
   parser: $parser
@@ -91,9 +93,33 @@ $document_store: !pw.xpacks.llm.document_store.DocumentStore
   retriever_factory: $retriever_factory
 
 # =============================================================================
+# CRYPTO MESSAGE INDEXING CONFIGURATION
+# =============================================================================
+# Metadata fields to index with each message (Requirements: 8.2)
+# - message_id: Unique identifier for the message
+# - timestamp: When the message was created
+# - sentiment: Sentiment score from -1 to 1
+# - influence_score: Author influence (followers * 0.6 + engagement * 0.4)
+# - source_platform: Origin platform (simulator, twitter, discord)
+crypto_metadata_fields:
+  - message_id
+  - timestamp
+  - sentiment
+  - influence_score
+  - source_platform
+  - author_id
+  - author_followers
+  - engagement_count
+  - tags
+
+# RAG retrieval configuration (Requirements: 8.3)
+rag_top_k: 15  # Retrieve top 15 most relevant messages
+
+# =============================================================================
 # QUESTION ANSWERING (RAG)
 # =============================================================================
 # Crypto-optimized RAG question answerer
+# Uses AdaptiveRAG for better context retrieval (Requirements: 8.3, 8.4)
 question_answerer: !pw.xpacks.llm.question_answering.AdaptiveRAGQuestionAnswerer
   llm: $llm
   indexer: $document_store
@@ -101,6 +127,30 @@ question_answerer: !pw.xpacks.llm.question_answering.AdaptiveRAGQuestionAnswerer
   factor: 2
   max_iterations: 4
   strict_prompt: true
+
+# =============================================================================
+# CRYPTO RAG PROMPT TEMPLATE
+# =============================================================================
+# Custom prompt template for crypto-specific RAG queries
+# Enriched with live metrics: pulse_score, trending_phrases, influencer_consensus
+# Requirements: 8.4
+crypto_rag_prompt_template: |
+  You are a crypto momentum analyst. Answer based on LIVE social data.
+
+  Current Pulse Score: {pulse_score}/10
+  Top Trending Phrases: {trending_phrases}
+  Influencer Consensus: {influencer_consensus}
+  Price-Sentiment Status: {divergence_status}
+
+  Recent messages:
+  {context}
+
+  User question: {query}
+
+  Provide:
+  1. Direct answer with pulse score interpretation
+  2. Top 3 repeating phrases from recent threads
+  3. Risk assessment (are we early or late to this narrative?)
 
 # =============================================================================
 # SERVER CONFIGURATION
