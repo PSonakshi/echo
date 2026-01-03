@@ -124,15 +124,15 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
     - Use Ollama (from template config) for LLM responses
     - _Requirements: 8.3, 8.4_
 
-- [ ] 10. Telegram Bot
-  - [ ] 10.1 Create bot/telegram_bot.py with TelegramAlertBot class
+- [x] 10. Telegram Bot
+  - [x] 10.1 Create bot/telegram_bot.py with TelegramAlertBot class
     - Use python-telegram-bot library
     - Send alerts for score >= 7 (🚀 Strong Buy Signal) and score <= 3 (❄️ Cooling Off)
     - _Requirements: 9.1, 9.2, 9.5_
-  - [ ] 10.2 Add divergence warning alerts
+  - [x] 10.2 Add divergence warning alerts
     - Send ⚠️ warning when bearish/bullish divergence detected
     - _Requirements: 9.3_
-  - [ ] 10.3 Implement /query command handler
+  - [x] 10.3 Implement /query command handler
     - Handle user queries via RAG system from task 9.3
     - Return formatted response with pulse score, phrases, and risk assessment
     - _Requirements: 9.4_
