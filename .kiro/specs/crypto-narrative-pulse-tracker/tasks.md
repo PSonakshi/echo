@@ -6,10 +6,12 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
 
 **Base Template:** Pathway RAG template (already cloned)
 
-- `app.py` - Main application entry point
+- `main.py` - Main application entry point (API server + demo mode)
+- `app.py` - Pathway pipeline configuration
 - `app.yaml` - YAML configuration for RAG components
 - `Dockerfile` - Container configuration
 - `requirements.txt` - Python dependencies
+- `FEGUIDE.md` - Frontend integration guide for Next.js
 
 ## Tasks
 
@@ -142,21 +144,25 @@ This implementation builds on the existing Pathway RAG template. Phase 1 (Core) 
   - Test Telegram bot alerts and queries
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 12. Streamlit Dashboard
-  - [ ] 12.1 Create dashboard/streamlit_app.py with basic layout
-    - Display real-time pulse score with large number indicator
+- [ ] 12. Backend API & Frontend Integration
+  - [ ] 12.1 Create REST API endpoints in main.py (Flask/FastAPI)
+    - GET /api/metrics - Return current pulse score, phrases, divergence, consensus
+    - GET /api/metrics/history - Return historical pulse scores for charting
+    - POST /api/config - Update tracked coin configuration
+    - POST /api/query - Handle RAG queries from frontend
+    - _Requirements: 11.1, 11.2, 11.4_
+  - [ ] 12.2 Add CORS and authentication middleware
+    - Configure CORS for frontend origin (localhost:3000, production domain)
+    - Add optional API key authentication for protected endpoints
     - _Requirements: 11.1_
-  - [ ] 12.2 Add pulse score line chart
-    - Use st.line_chart() to plot score history over time
-    - Auto-refresh every 5 seconds
+  - [ ] 12.3 Create metrics history storage
+    - Store pulse score history in memory or SQLite for charting
+    - Retain last 24-48 hours of data points
     - _Requirements: 11.1_
-  - [ ] 12.3 Add trending phrases display
-    - Show top 5 phrases as a list or simple word cloud
-    - Update every 30 seconds
-    - _Requirements: 11.2_
-  - [ ] 12.4 Add price and correlation status panel
-    - Display current price and divergence status with color coding
-    - _Requirements: 11.4_
+  - [ ] 12.4 Add WebSocket support
+    - Real-time metrics push to frontend clients
+    - Alternative to polling for live updates
+    - _Requirements: 11.1_
 
 - [ ] 13. Phrase Clustering (Phase 3)
   - [ ] 13.1 Create transforms/phrase_clusterer.py

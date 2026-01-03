@@ -163,15 +163,15 @@ class TestTelegramBotAlerts:
             STRONG_BUY_TEMPLATE,
         )
 
-        # Strong buy template
+        # Strong buy template (now "High Momentum Alert")
         assert "🚀" in STRONG_BUY_TEMPLATE
-        assert "Strong Buy Signal" in STRONG_BUY_TEMPLATE
+        assert "High Momentum" in STRONG_BUY_TEMPLATE
         assert "{score" in STRONG_BUY_TEMPLATE
         assert "{phrases}" in STRONG_BUY_TEMPLATE
 
-        # Cooling off template
+        # Cooling off template (now "Low Momentum Alert")
         assert "❄️" in COOLING_OFF_TEMPLATE
-        assert "Cooling Off" in COOLING_OFF_TEMPLATE
+        assert "Low Momentum" in COOLING_OFF_TEMPLATE
         assert "{score" in COOLING_OFF_TEMPLATE
 
         # Divergence warning template

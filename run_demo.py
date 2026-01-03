@@ -216,6 +216,14 @@ _Hype cycle simulation in progress..._"""
 
         phases_summary = "\n".join(phase_lines)
 
+        # Simple interpretation based on average score
+        if avg_score >= 7:
+            meaning = "Strong bullish momentum detected! High social buzz usually indicates growing interest - but remember, hype can fade quickly."
+        elif avg_score <= 3:
+            meaning = "Low momentum detected. This usually means declining interest or fear in the market - could be a dip or continued downtrend."
+        else:
+            meaning = "Mixed signals detected. The market sentiment is undecided - typically means sideways movement until a clear trend forms."
+
         message = f"""📈 *Simulation Complete: ${self.coin}*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 *Phase Results:*
@@ -223,7 +231,11 @@ _Hype cycle simulation in progress..._"""
 
 📊 *Average Score:* {avg_score:.1f}/10
 
-_Demo complete! In production, this runs continuously with real data._"""
+*What this means:*
+{meaning}
+
+_Demo complete! In production, this runs 24/7 with real social media data._
+⚠️ _Not financial advice - always DYOR!_"""
 
         return await self.send_message(message)
 

@@ -30,42 +30,90 @@ logger = logging.getLogger(__name__)
 # ALERT MESSAGE TEMPLATES
 # =============================================================================
 
-STRONG_BUY_TEMPLATE = """🚀 *Momentum Alert: ${coin}*
+STRONG_BUY_TEMPLATE = """🚀 *High Momentum Alert: ${coin}*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 *Pulse Score:* {score:.1f}/10
-📈 *Signal:* Strong Buy Signal
-🔥 *Trending:* {phrases}
+
+📊 *Pulse Score:* {score:.1f} out of 10
+
+*What does this mean?*
+The Pulse Score measures social media buzz and sentiment. A score of {score:.1f} is considered HIGH - this usually indicates strong bullish momentum and increased community interest.
+
+📈 *Current Signal:* Strong Positive Momentum
+• Social sentiment is very positive
+• Community engagement is elevated
+• This is typically when traders consider entry points
+
+🔥 *What people are saying:* {phrases}
 {divergence_warning}
-_Reply /query for detailed analysis_"""
+⚠️ *Remember:* High momentum can reverse quickly. This is not financial advice - always do your own research (DYOR) and never invest more than you can afford to lose.
 
-COOLING_OFF_TEMPLATE = """❄️ *Momentum Alert: ${coin}*
+_Type /query followed by your question for detailed AI analysis_
+_Type /help to see all available commands_"""
+
+COOLING_OFF_TEMPLATE = """❄️ *Low Momentum Alert: ${coin}*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 *Pulse Score:* {score:.1f}/10
-📉 *Signal:* Cooling Off
-🔥 *Trending:* {phrases}
+
+📊 *Pulse Score:* {score:.1f} out of 10
+
+*What does this mean?*
+The Pulse Score measures social media buzz and sentiment. A score of {score:.1f} is considered LOW - this usually indicates declining interest or bearish sentiment in the community.
+
+📉 *Current Signal:* Cooling Off / Declining Momentum
+• Social sentiment has turned negative or neutral
+• Community engagement is decreasing
+• This is typically when traders exercise caution
+
+🔥 *What people are saying:* {phrases}
 {divergence_warning}
-_Reply /query for detailed analysis_"""
+💡 *Tip:* Low momentum periods can be accumulation opportunities for long-term believers, but they can also signal further decline. This is not financial advice - always DYOR.
 
-DIVERGENCE_WARNING_TEMPLATE = """⚠️ *Divergence Warning: ${coin}*
+_Type /query followed by your question for detailed AI analysis_
+_Type /help to see all available commands_"""
+
+DIVERGENCE_WARNING_TEMPLATE = """⚠️ *Divergence Alert: ${coin}*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 *Pulse Score:* {score:.1f}/10
-⚠️ *Warning:* {divergence_type}
-📈 *Price vs Sentiment:* {explanation}
-🔥 *Trending:* {phrases}
 
-_This may indicate a potential reversal. Exercise caution._"""
+📊 *Pulse Score:* {score:.1f} out of 10
+⚠️ *Alert Type:* {divergence_type}
 
-QUERY_RESPONSE_TEMPLATE = """📊 *Crypto Pulse Analysis*
+*What is a Divergence?*
+A divergence happens when price movement and social sentiment move in opposite directions. This is often considered an important warning signal by traders.
+
+📈 *What's happening:*
+{explanation}
+
+🔥 *What people are saying:* {phrases}
+
+*Why this matters:*
+Divergences can sometimes predict trend reversals. When the crowd feels one way but price moves the opposite direction, it may indicate the trend is about to change.
+
+⚠️ *Important:* Divergences are not guarantees - they're just one signal among many. This is not financial advice. Always combine multiple indicators and do your own research.
+
+_Type /query followed by your question for detailed AI analysis_"""
+
+QUERY_RESPONSE_TEMPLATE = """📊 *Crypto Pulse Analysis: ${coin}*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📈 *Pulse Score:* {score:.1f}/10
-🔥 *Trending:* {phrases}
-👥 *Influencer Consensus:* {consensus}
-📉 *Divergence Status:* {divergence}
 
-*Analysis:*
+📈 *Current Pulse Score:* {score:.1f}/10
+_{score_interpretation}_
+
+🔥 *Trending Phrases:* {phrases}
+_These are the most common terms being used in discussions_
+
+👥 *Influencer Sentiment:* {consensus}
+_What accounts with large followings are saying_
+
+📉 *Price-Sentiment Alignment:* {divergence}
+_Whether price and sentiment are moving together_
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*AI Analysis:*
 {answer}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-_Data updated: {timestamp}_"""
+⚠️ _This analysis is for informational purposes only and is not financial advice. Always DYOR._
+
+_Last updated: {timestamp}_"""
 
 
 # =============================================================================
@@ -355,17 +403,22 @@ class TelegramAlertBot:
         """Handle /start command."""
         welcome_message = f"""🚀 *Welcome to Crypto Pulse Tracker!*
 
-I'm tracking *${self.coin}* momentum in real-time.
+I help you track the social media buzz and sentiment around *${self.coin}* in real-time.
 
-*Commands:*
-/query <question> - Ask about current sentiment
-/status - Get current pulse score
-/help - Show this help message
+*What is Pulse Score?*
+It's a number from 1-10 that measures how much excitement and positive sentiment there is on social media. Higher = more bullish buzz!
 
-I'll send alerts when:
-📈 Pulse Score >= 7 (Strong Buy Signal)
-📉 Pulse Score <= 3 (Cooling Off)
-⚠️ Price-Sentiment Divergence detected"""
+*What I'll alert you about:*
+📈 Score ≥ 7 → High momentum (usually bullish)
+📉 Score ≤ 3 → Low momentum (usually bearish)
+⚠️ Divergence → Price and sentiment moving opposite
+
+*Commands you can use:*
+/status - See current pulse score and metrics
+/query <question> - Ask me anything about the market
+/help - Show detailed help
+
+⚠️ *Disclaimer:* This bot provides sentiment analysis only. It is NOT financial advice. Always do your own research (DYOR) before making any investment decisions."""
 
         await update.message.reply_text(welcome_message, parse_mode="Markdown")
 
@@ -375,22 +428,42 @@ I'll send alerts when:
         context: ContextTypes.DEFAULT_TYPE,
     ) -> None:
         """Handle /help command."""
-        help_message = """*Crypto Pulse Tracker Help*
+        help_message = """📚 *Crypto Pulse Tracker - Help Guide*
 
-*Commands:*
-• `/query <question>` - Ask about sentiment, trends, or analysis
-• `/status` - Get current pulse score and metrics
-• `/help` - Show this help message
+*Understanding the Pulse Score:*
+The Pulse Score (1-10) measures social media sentiment:
+• 8-10: Very High - Extreme excitement, peak hype
+• 7-8: High - Strong positive momentum
+• 4-6: Moderate - Mixed feelings, undecided
+• 3-4: Low - Declining interest
+• 1-3: Very Low - Fear or capitulation
 
-*Example queries:*
+*Available Commands:*
+
+📊 `/status`
+Shows current metrics including pulse score, trending phrases, and what influencers are saying.
+
+❓ `/query <your question>`
+Ask anything! Examples:
 • `/query What's the current sentiment?`
 • `/query Are influencers bullish or bearish?`
-• `/query What phrases are trending?`
+• `/query Should I be worried about this dip?`
+• `/query What are people talking about?`
 
-*Alert Types:*
-🚀 Strong Buy Signal (score >= 7)
-❄️ Cooling Off (score <= 3)
-⚠️ Divergence Warning"""
+*Alert Types Explained:*
+
+🚀 *High Momentum Alert*
+Sent when score reaches 7+. This usually indicates strong bullish sentiment - but remember, high excitement can also mean we're near a local top!
+
+❄️ *Cooling Off Alert*
+Sent when score drops to 3 or below. This usually indicates fear or declining interest - but it can also mean accumulation opportunities.
+
+⚠️ *Divergence Warning*
+Sent when price and sentiment move in opposite directions. This is often an early warning sign of a potential trend reversal.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ *Important Disclaimer:*
+This bot analyzes social sentiment only. It does NOT provide financial advice. Crypto is highly volatile and risky. Never invest more than you can afford to lose. Always DYOR!"""
 
         await update.message.reply_text(help_message, parse_mode="Markdown")
 
@@ -427,14 +500,31 @@ I'll send alerts when:
         """Handle /status command."""
         # Get current metrics
         metrics = self._get_current_metrics()
+        score = metrics["score"]
+        score_interpretation = self._get_score_interpretation(score)
 
         status_message = f"""📊 *Current Status: ${self.coin}*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📈 *Pulse Score:* {metrics["score"]:.1f}/10
-🔥 *Trending:* {metrics["phrases"]}
-👥 *Influencer Consensus:* {metrics["consensus"]}
-📉 *Divergence:* {metrics["divergence"]}
-⚡ *Velocity:* {metrics["velocity"]:.2f}"""
+
+📈 *Pulse Score:* {score:.1f}/10
+_{score_interpretation}_
+
+🔥 *Trending Phrases:* {metrics["phrases"]}
+_What the community is talking about most_
+
+👥 *Influencer Sentiment:* {metrics["consensus"]}
+_What large accounts are saying_
+
+📉 *Price-Sentiment Status:* {metrics["divergence"]}
+
+⚡ *Sentiment Velocity:* {metrics["velocity"]:.2f}
+_How fast sentiment is changing (+ = improving, - = declining)_
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 *Quick Interpretation:*
+{"🟢 Momentum is strong - community is excited!" if score >= 7 else "🔴 Momentum is weak - community sentiment is low" if score <= 3 else "🟡 Momentum is moderate - mixed signals"}
+
+_Use /query <question> for detailed AI analysis_"""
 
         await update.message.reply_text(status_message, parse_mode="Markdown")
 
@@ -469,6 +559,8 @@ I'll send alerts when:
         from datetime import datetime
 
         metrics = self._get_current_metrics()
+        score = metrics["score"]
+        score_interpretation = self._get_score_interpretation(score)
 
         if self.rag_system is not None:
             try:
@@ -476,8 +568,13 @@ I'll send alerts when:
                 rag_response = self.rag_system.answer(query)
 
                 return QUERY_RESPONSE_TEMPLATE.format(
+                    coin=self.coin,
                     score=rag_response.pulse_score,
-                    phrases=", ".join(rag_response.trending_phrases[:3]) or "None",
+                    score_interpretation=self._get_score_interpretation(
+                        rag_response.pulse_score
+                    ),
+                    phrases=", ".join(rag_response.trending_phrases[:3])
+                    or "None detected",
                     consensus=rag_response.influencer_consensus,
                     divergence=rag_response.divergence_status,
                     answer=rag_response.answer,
@@ -490,11 +587,13 @@ I'll send alerts when:
 
         # Basic response without RAG
         return QUERY_RESPONSE_TEMPLATE.format(
-            score=metrics["score"],
+            coin=self.coin,
+            score=score,
+            score_interpretation=score_interpretation,
             phrases=metrics["phrases"],
             consensus=metrics["consensus"],
             divergence=metrics["divergence"],
-            answer=f"_RAG system not available. Showing current metrics for query: {query}_",
+            answer=f"_AI analysis is currently unavailable. Here are the current metrics for your query: {query}_",
             timestamp=datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
         )
 
@@ -529,19 +628,35 @@ I'll send alerts when:
     def _format_divergence(self, divergence: str) -> str:
         """Format divergence status for display."""
         status_map = {
-            "aligned": "✅ Aligned",
-            "bearish_divergence": "⚠️ Bearish Divergence",
-            "bullish_divergence": "📈 Bullish Divergence",
+            "aligned": "✅ Aligned (Price and sentiment moving together)",
+            "bearish_divergence": "⚠️ Bearish Divergence (Sentiment high, price falling)",
+            "bullish_divergence": "📈 Bullish Divergence (Sentiment low, price rising)",
         }
         return status_map.get(divergence, divergence)
 
     def _get_divergence_explanation(self, divergence_type: str) -> str:
         """Get explanation for divergence type."""
         explanations = {
-            "bearish_divergence": "Sentiment is high but price is falling. This may indicate a potential top.",
-            "bullish_divergence": "Sentiment is low but price is rising. This may indicate a potential bottom.",
+            "bearish_divergence": "Social sentiment is very positive, but the price is actually falling. This mismatch is called a 'bearish divergence' - it sometimes happens before a price drop, as the crowd may be overly optimistic while smart money exits.",
+            "bullish_divergence": "Social sentiment is negative or fearful, but the price is actually rising. This mismatch is called a 'bullish divergence' - it sometimes happens before a price increase, as the crowd may be overly pessimistic while smart money accumulates.",
         }
-        return explanations.get(divergence_type, "Unknown divergence pattern")
+        return explanations.get(
+            divergence_type,
+            "An unusual pattern between price and sentiment has been detected.",
+        )
+
+    def _get_score_interpretation(self, score: float) -> str:
+        """Get beginner-friendly interpretation of pulse score."""
+        if score >= 8:
+            return "Very High - Extreme bullish sentiment, usually indicates peak excitement"
+        elif score >= 7:
+            return "High - Strong positive momentum, typically seen during rallies"
+        elif score >= 5:
+            return "Moderate - Mixed or neutral sentiment, market is undecided"
+        elif score >= 3:
+            return "Low - Declining interest, sentiment turning negative"
+        else:
+            return "Very Low - Minimal buzz, often seen during fear or capitulation"
 
     # =========================================================================
     # BOT LIFECYCLE
