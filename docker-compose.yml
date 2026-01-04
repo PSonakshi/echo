@@ -4,7 +4,7 @@ services:
   pipeline:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.pathway
     container_name: crypto-pulse-pipeline
     ports:
       - "${WEBHOOK_PORT:-8080}:8080"
