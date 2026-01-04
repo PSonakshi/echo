@@ -1,117 +1,57 @@
 #!/usr/bin/env python
 """
-Minimal Railway startup script.
-This bypasses the complex main.py to debug startup issues.
+Railway startup wrapper - runs the full main.py Flask app.
 """
 
 import os
 import sys
-
-# Add project root to path
-sys.path.insert(0, ".")
+import traceback
 
 # Get port from environment (Railway sets this)
 PORT = int(os.environ.get("PORT", 8000))
-HOST = os.environ.get("HOST", "0.0.0.0")
-
-print(f"Starting on {HOST}:{PORT}")
-print(f"Python version: {sys.version}")
-print(f"Working directory: {os.getcwd()}")
-print(f"Files in directory: {os.listdir('.')[:10]}")
-
-# Try importing dependencies one by one to find the issue
-print("\nChecking dependencies...")
+print(f"Starting Crypto Pulse API on port {PORT}")
+print(f"Python: {sys.version}")
+sys.stdout.flush()
 
 try:
-    from dotenv import load_dotenv
+    # Add project root to path
+    sys.path.insert(0, ".")
 
-    load_dotenv()
-    print("✓ python-dotenv")
-except ImportError as e:
-    print(f"✗ python-dotenv: {e}")
-
-try:
-    from flask import Flask
-
-    print("✓ flask")
-except ImportError as e:
-    print(f"✗ flask: {e}")
-
-try:
-    from flask_cors import CORS
-
-    print("✓ flask-cors")
-except ImportError as e:
-    print(f"✗ flask-cors: {e}")
-
-try:
-    from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
-    print("✓ vaderSentiment")
-except ImportError as e:
-    print(f"✗ vaderSentiment: {e}")
-
-try:
-    import requests
-
-    print("✓ requests")
-except ImportError as e:
-    print(f"✗ requests: {e}")
-
-# Try importing local modules
-print("\nChecking local modules...")
-
-try:
-    # Mock pathway before importing modules that need it
+    # Mock pathway before any imports
     from unittest.mock import MagicMock
 
     mock_pw = MagicMock()
     mock_pw.Schema = type("Schema", (), {})
+    mock_pw.Duration = MagicMock()
+    mock_pw.DateTimeUtc = MagicMock()
     sys.modules["pathway"] = mock_pw
-    print("✓ pathway mocked")
-except Exception as e:
-    print(f"✗ pathway mock: {e}")
+    print("✓ Pathway mocked")
+    sys.stdout.flush()
 
-try:
-    print("✓ transforms.sentiment")
-except Exception as e:
-    print(f"✗ transforms.sentiment: {e}")
+    # Set environment
+    os.environ["PORT"] = str(PORT)
+    os.environ["HOST"] = "0.0.0.0"
 
-try:
-    print("✓ transforms.pulse_score")
-except Exception as e:
-    print(f"✗ transforms.pulse_score: {e}")
+    # Import Flask app directly
+    print("Importing main module...")
+    sys.stdout.flush()
 
-try:
-    print("✓ simulator.hype_simulator")
-except Exception as e:
-    print(f"✗ simulator.hype_simulator: {e}")
+    from main import create_api_app
 
-# Create minimal Flask app
-print("\nStarting minimal Flask app...")
+    print("✓ main module imported")
+    sys.stdout.flush()
 
-try:
-    app = Flask(__name__)
-    CORS(app)
+    app = create_api_app()
+    print("✓ Flask app created")
+    sys.stdout.flush()
 
-    @app.route("/health")
-    def health():
-        return {"status": "healthy", "port": PORT}
-
-    @app.route("/")
-    def root():
-        return {"message": "Crypto Pulse API", "status": "running"}
-
-    @app.route("/api/metrics")
-    def metrics():
-        return {"pulse_score": 5.0, "trending_phrases": ["test"], "status": "ok"}
-
-    print(f"Starting Flask on {HOST}:{PORT}...")
-    app.run(host=HOST, port=PORT, debug=False)
+    # Run the app
+    print(f"Starting Flask server on 0.0.0.0:{PORT}...")
+    sys.stdout.flush()
+    app.run(host="0.0.0.0", port=PORT, debug=False, threaded=True)
 
 except Exception as e:
-    print(f"Failed to start Flask: {e}")
-    import traceback
-
+    print(f"ERROR: {e}")
     traceback.print_exc()
+    sys.stdout.flush()
     sys.exit(1)
