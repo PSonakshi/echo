@@ -6,18 +6,26 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy and install Python dependencies (Railway-specific, no Pathway)
+COPY requirements-railway.txt .
+RUN pip install --no-cache-dir -r requirements-railway.txt
 
 # Copy application code
 COPY . .
 
-# Default port 8000 (Railway overrides with $PORT)
+# Railway uses PORT env variable (usually random), default to 8000
 ENV PORT=8000
-EXPOSE 8000
+ENV HOST=0.0.0.0
 
-# Run the API server on port 8000
-CMD python main.py --port ${PORT:-8000}
+# Expose the port
+EXPOSE ${PORT}
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/health || exit 1
+
+# Run the API server - use shell form to expand env vars
+CMD python main.py --host 0.0.0.0 --port ${PORT}
