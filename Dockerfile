@@ -18,11 +18,11 @@ RUN pip install --no-cache-dir -r requirements-railway.txt
 # Copy application code
 COPY . .
 
-# Railway uses PORT env variable
+# Railway sets PORT env variable
 ENV PORT=8000
 ENV HOST=0.0.0.0
 
 EXPOSE 8000
 
-# Simple startup script for debugging
-CMD ["python", "start_railway.py"]
+# Run the full API server (reads PORT from env)
+CMD ["python", "main.py"]

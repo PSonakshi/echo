@@ -1387,12 +1387,17 @@ def main():
     """Main entry point."""
     import argparse
 
+    # Get port from environment variable (Railway sets this)
+    default_port = int(os.environ.get("PORT", 8000))
+
     parser = argparse.ArgumentParser(description="Crypto Narrative Pulse Tracker")
     parser.add_argument("--demo", action="store_true", help="Run demo simulation")
     parser.add_argument(
         "--no-telegram", action="store_true", help="Disable Telegram in demo mode"
     )
-    parser.add_argument("--port", type=int, default=8000, help="API server port")
+    parser.add_argument(
+        "--port", type=int, default=default_port, help="API server port"
+    )
     parser.add_argument("--host", default="0.0.0.0", help="API server host")
     parser.add_argument(
         "--no-websocket", action="store_true", help="Disable WebSocket support"
